@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "build": 610373,
+  "epoch": 1789215125,
+  "path": "catalogues/610373/1789215125/catalogue.dctl",
+  "blake3": "c20a6d495eaae5cd653730eae7c80de5d6f310b8dadb4cdfcfb983d6db20f1ea",
+  "size": 131925,
+  "encrypted": true,
+  "encryption": "AES-256-GCM",
+  "format": "DCTE",
+  "key_id": "default"
+}

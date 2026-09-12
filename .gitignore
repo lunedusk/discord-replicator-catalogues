@@ -1,0 +1,11 @@
+.DS_Store
+__pycache__/
+*.plain.dctl
+secrets/
+*.key
+.venv/
+data/har/
+*.har
+secrets/
+*.key
+catalogue.plain.dctl

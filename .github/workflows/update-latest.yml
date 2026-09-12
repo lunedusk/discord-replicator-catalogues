@@ -1,0 +1,80 @@
+name: Update latest.json
+
+on:
+  push:
+    paths:
+      - "catalogues/**/catalogue.dctl"
+      - "catalogues/**/meta.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find newest snapshot and refresh latest.json
+        run: |
+          set -euo pipefail
+          python3 << 'PY'
+          import json, time
+          from pathlib import Path
+
+          root = Path("catalogues")
+          best = None  # (build, epoch, meta_path, meta)
+
+          for meta_path in root.glob("*/*/meta.json"):
+              try:
+                  meta = json.loads(meta_path.read_text())
+              except Exception:
+                  continue
+              build = int(meta.get("build") or meta_path.parts[1])
+              epoch = int(meta.get("epoch") or meta_path.parts[2])
+              dctl = meta_path.parent / "catalogue.dctl"
+              if not dctl.is_file():
+                  continue
+              # prefer meta blake3; if missing, skip (publisher should set it)
+              if not meta.get("blake3"):
+                  print("skip (no blake3):", meta_path)
+                  continue
+              rel = str(dctl).replace("\\", "/")
+              meta.setdefault("path", rel)
+              meta.setdefault("endpoints_jsonl", str(meta_path.parent / "endpoints.jsonl").replace("\\", "/"))
+              meta["size"] = dctl.stat().st_size
+              cand = (build, epoch, meta_path, meta)
+              if best is None or cand[0] > best[0] or (cand[0] == best[0] and cand[1] > best[1]):
+                  best = cand
+
+          if best is None:
+              raise SystemExit("no valid snapshots found under catalogues/")
+
+          build, epoch, meta_path, meta = best
+          latest = {
+              "schema_version": int(meta.get("schema_version") or 1),
+              "build": build,
+              "epoch": epoch,
+              "path": meta["path"],
+              "endpoints_jsonl": meta.get("endpoints_jsonl"),
+              "science_jsonl": meta.get("science_jsonl"),
+              "blake3": meta["blake3"],
+              "size": meta.get("size"),
+              "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+          }
+          Path("latest.json").write_text(json.dumps(latest, indent=2) + "\n")
+          print("latest.json ->", json.dumps(latest, indent=2))
+          PY
+
+      - name: Commit latest.json if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add latest.json
+          if git diff --staged --quiet; then
+            echo "latest.json unchanged"
+          else
+            git commit -m "chore: update latest.json to newest catalogue snapshot"
+            git push
+          fi
