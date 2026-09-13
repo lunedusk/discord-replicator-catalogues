@@ -8,6 +8,5 @@
   "encrypted": true,
   "encryption": "AES-256-GCM",
   "format": "DCTE",
-  "key_id": "default",
-  "updated_at": "2026-09-13T06:51:59Z"
+  "key_id": "default"
 }
