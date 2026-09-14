@@ -3,11 +3,9 @@
   "build": 610373,
   "epoch": 1789388715,
   "path": "catalogues/610373/1789388715/catalogue.dctl",
+  "endpoints_jsonl": "catalogues/610373/1789388715/endpoints.jsonl",
+  "science_jsonl": null,
   "blake3": "b85c5a08a178f644f72488dc96a66e5c3eb05b4859452a4c008e2280bb328d54",
   "size": 260633,
-  "encrypted": true,
-  "encryption": "AES-256-GCM",
-  "format": "DCTE",
-  "key_id": "default",
-  "updated_at": "2026-09-14T12:27:28Z"
+  "updated_at": "2026-09-14T12:27:38Z"
 }
